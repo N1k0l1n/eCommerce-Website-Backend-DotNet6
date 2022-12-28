@@ -4,15 +4,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace eCommerce.Controllers
+namespace eCommerce.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ProductsController : ControllerBase
+
+    public class ProductsController : BaseApiController
     {
         private readonly StoreContext _context;
-        public ProductsController(StoreContext context )
-        { 
+        public ProductsController(StoreContext context)
+        {
             _context = context;
         }
 
@@ -21,13 +20,17 @@ namespace eCommerce.Controllers
         {
             return await _context.Products.ToListAsync();
         }
-          
 
-        [HttpGet("{id}")]  
 
-        public async  Task<ActionResult<Product>> GetProduct(int id)
+        [HttpGet("{id}")]
+
+        public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            return await _context.Products.FindAsync(id);
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)   return NotFound();
+
+            return product;
+            
         }
     }
 }
