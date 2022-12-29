@@ -1,6 +1,5 @@
 ﻿using eCommerce.Data;
 using eCommerce.Enitites;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
