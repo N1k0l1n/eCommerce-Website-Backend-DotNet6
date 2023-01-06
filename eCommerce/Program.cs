@@ -1,11 +1,21 @@
 using eCommerce.Data;
 using Microsoft.EntityFrameworkCore;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddSession(options =>
+{
+    options.Cookie.Name = ".AdventureWorks.Session";
+    options.IdleTimeout = TimeSpan.FromSeconds(10);
+    options.Cookie.IsEssential = true;
+});
+
+
 //Dependency Injection
 
 builder.Services.AddDbContext<StoreContext>(options =>
@@ -14,6 +24,21 @@ builder.Services.AddDbContext<StoreContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DevConnection"));
 });
 
+//Enable CORS
+const string AllowAllHeadersPolicy = "AllowAllPolicy";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(AllowAllHeadersPolicy,
+        builder =>
+        {
+            builder
+                .WithOrigins(new[] { "http://localhost:3000" })
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
+});
 
 
 // Add services to the container.
@@ -22,8 +47,6 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
 
-//Enable CORS
-builder.Services.AddCors();
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -47,6 +70,8 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseSession();
+
 app.UseMiddleware<eCommerce.API.Middleware.ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
@@ -56,14 +81,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors(c => c  .SetIsOriginAllowed(origin => true) // allow any origin
-                    .AllowAnyHeader()
-                    .AllowCredentials()
-                    .AllowAnyMethod()
-                    .WithOrigins("http://localhost:3000", "https://localhost:3000"));
+app.UseRouting();
 
-
-app.UseHttpsRedirection(); 
+app.UseCors(AllowAllHeadersPolicy);
 
 
 
